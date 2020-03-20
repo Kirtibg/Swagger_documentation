@@ -9,4 +9,4 @@ Examples are given for better understanding of the APIs.
 # Swagger link: 
 https://app.swaggerhub.com/apis-docs/Kirtibg/Project/1.0.0
 
-I thank PayPal VAP team for their support and guidance in the making of this project.
+I thank the PayPal VAP team for their guidance in this project.
