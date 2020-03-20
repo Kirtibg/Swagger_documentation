@@ -9,7 +9,7 @@ info:
 servers:
   - description: SwaggerHub API Auto Mocking
     url: https://virtserver.swaggerhub.com/Kirtibg/Project/1.0.0
-  - url: 'https://petstore.swagger.io/v2'
+  - url: 'https://fabprints.swagger.io/v2'
   
 tags:
   - name: Categories
