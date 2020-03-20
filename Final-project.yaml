@@ -1,0 +1,775 @@
+openapi: 3.0.0
+info:
+  description: |
+    API documentation for FabPrints server, an online clothing brand. 
+    A customer can go through products under category of choice and apply filters. A logged in customer can add products to wishlist, bag and even place orders. Only an admin has access to add, delete and change product details.
+  version: "1.0.0"
+  title: FabPrints
+
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/Kirtibg/Project/1.0.0
+  - url: 'https://petstore.swagger.io/v2'
+  
+tags:
+  - name: Categories
+    description: About our categories
+  - name: Products
+    description: About our specific products
+  - name: Customers
+    description: About customers
+   
+paths:
+  '/categories':
+    get:
+      tags:
+        - Categories
+      summary: Category list
+      description: Get a list of broad categories available to shop from
+      operationId: getCategories
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/categories'
+             
+    post:
+      tags:
+        - Categories
+      summary: Adding category
+      description: Adds a new category to the list, can be done only by the admin.
+      operationId: addCategories
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/categories'
+      responses:
+        '200':
+          description: Successful operation
+        '405':
+          description: Invalid input
+        '401':
+          description: Authorization information is missing or invalid.
+      security:
+        - OAuth2: [admin]
+         
+   
+  '/categories/{categoryId}':
+                
+    get:
+      tags:
+        - Categories
+      summary: List of product under category
+      description: Get a list of products from chosen category, filtered according to parameters in the query. 
+      operationId: getProducts
+      parameters:
+        - name: categoryId
+          in: path
+          description: ID of category return
+          required: true
+          schema:
+            type: integer
+            format: int32
+          example: 1001
+        - name: filter
+          in: query
+          description: Requirements of user that need to be considered for filter
+          required: false
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/filter'
+      responses:
+        '200':
+          description: Successful operation, returns list of products under the category after applying filters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/categoryProducts'
+        '405':
+          description: Invalid requirements
+        '404':
+          description: Category not found
+            
+    post:
+      tags:
+        - Categories
+      summary: Add a product under specific category
+      description: Adds a new product under category defined by category Id, can be done only by the admin.
+      operationId: addProducts
+      parameters:
+        - name: categoryId
+          in: path
+          description: ID of category under which product will be added
+          required: true
+          schema:
+            type: integer
+            format: int32
+            example: 1001
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/products'
+      responses:
+        '200':
+          description: Successful operation
+        '405':
+          description: Invalid input
+        '401':
+          description: Authorization information is missing or invalid.
+      security:
+        - OAuth2: [admin]
+        
+    delete:
+      tags:
+        - Categories
+      summary: Delete category
+      description: Deletes a category from the list, to be done only by the admin.
+      operationId: delteCategories
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          schema:
+                type: integer
+                format: int32
+                example: 1001
+      responses:
+        '200':
+          description: Successful operation
+        '404':
+          description: Category not found
+        '401':
+          description: Authorization information is missing or invalid.
+      security:
+        - OAuth2: [admin]
+        
+    
+        
+  '/categories/{categoryId}/products/{productId}':
+    get:
+      tags:
+        - Products
+      summary: Product details
+      description: Gets details about specified product.
+      parameters:
+        - name: categoryId
+          schema:
+            type: integer
+            format: int32
+            example: 1001
+          in: path
+          required: true
+        - name: productId
+          schema:
+            type: integer
+            format: int64 
+            example: 54001
+          in: path
+          required: true
+      responses:
+        '200':
+          description: Success Response, returns details about product 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/products'
+        '404':
+          description: Product not found
+    put:
+      tags:
+        - Products
+      summary: Change product details
+      description: Edit details about a specific product
+      parameters:
+        - name: categoryId
+          schema:
+            type: integer
+            format: int32
+            example: 1001
+          in: path
+          required: true
+        - name: productId
+          schema:
+            type: integer
+            format: int64 
+            example: 54001
+          in: path
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/products'
+      responses:
+        '200':
+          description: Successful operation
+        '404':
+          description: Invalid input
+        '401':
+          description: Authorization information is missing or invalid.
+      security:
+        - OAuth2: [admin]
+        
+    delete:
+      tags:
+        - Products
+      summary: Delete product 
+      description: Deletes a product spcified by product Id, by the admin. 
+      parameters:
+        - name: categoryId
+          schema:
+            type: integer
+            format: int32
+            example: 1001
+          in: path
+          required: true
+        - name: productId
+          schema:
+            type: integer
+            format: int64 
+            example: 54001
+          in: path
+          required: true
+      responses:
+        '200':
+          description: Successful operation
+        '405':
+          description: Invalid input
+        '401':
+          description: Authorization information is missing or invalid.
+      security:
+        - OAuth2: [admin]
+  '/customers/signUp':
+    post:
+      tags:
+        - Customers
+      summary: To sign up a customer
+      operationId: customerSignUp
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/customer'
+        description: Created customer object
+        required: true
+      responses:
+        '200':
+          description: Successful operation, new account created
+             
+  '/customers/login':
+    get:
+      tags:
+        - Customers
+      summary: Logs in the customer
+      operationId: customerLogin
+      parameters:
+        - name: username
+          in: query
+          description: Name of the customer
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: Password 
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully logged in
+        '400':
+          description: Invalid username/password
+          
+          
+  '/customers/{customerId}/profile':
+    get:
+      tags:
+        - Customers
+      summary: Displays customer profile
+      description: Customer profile can be checked by the customer and admin
+      operationId: customerProfile
+      parameters:
+        - name: customerId
+          in: path
+          description: Id of customer
+          required: true
+          schema:
+            type: integer 
+      responses:
+        '200':
+          description: Success Response, returns profile of customer
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/profile'
+        '404':
+          description: Customer not found
+        '401':
+          description: Authorization information is missing or invalid.
+      security:
+        - OAuth2: [customer, admin]
+    
+    put:
+      tags:
+        - Customers
+      summary: Edits profile by customer only. The ustomer form is submitted again with desired changes.
+      operationId: editProfile
+      parameters:
+        - name: customerId
+          in: path
+          description: Id of customer 
+          required: true
+          schema:
+            type: integer 
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/profile'
+        description: Create new customer object with changes in profile and replaces the old profile.
+        required: true
+      responses:
+        '200':
+          description: Successful Response, edits profile of customer
+        '404':
+          description: Customer not found
+        '401':
+          description: Authorization information is missing or invalid.
+      security:
+        - OAuth2: [customer]
+          
+  '/customers/{customerId}/wishlist':
+    get:
+      tags:
+        - Customers
+      summary: Displays customer's wishlist
+      description: Gets the wishlist of the customer. Can be accessed by the customer and admin.
+      operationId: customerWishlist
+      parameters:
+        - name: customerId
+          in: path
+          description: Id of customer
+          required: true
+          schema:
+            type: integer 
+      responses:
+        '200':
+          description: Successful Response, returns wishlist of customer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/customerProducts'
+        '404':
+          description: Customer not found
+        '401':
+          description: Authorization information is missing or invalid.
+      security:
+        - OAuth2: [customer, admin]
+    post:
+      tags:
+        - Customers
+      summary: Adds to the wishlist
+      description: Adds a product to the wishlist of the customer. Can be accessed by the customer only.
+      operationId: addWishlist
+      parameters:
+        - name: customerId
+          in: path
+          description: Id of customer
+          required: true
+          schema:
+            type: integer 
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/customerProducts'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          
+        '404':
+          description: Customer not found
+        '401':
+          description: Authorization information is missing or invalid.
+      security:
+        - OAuth2: [customer]
+  '/customers/{customerId}/wishlist/{productId}':
+    delete:
+      tags:
+        - Customers
+      summary: Deletes product from wishlist
+      description: Deletes chosen product from wishlist of the customer. Can be accessed by the customer .
+      operationId: deleteFromWishlist
+      parameters:
+        - name: customerId
+          in: path
+          description: Id of customer
+          required: true
+          schema:
+            type: integer 
+            format: int32
+            example: 1001
+        - name: productId
+          in: path
+          description: Id of product
+          required: true
+          schema:
+            type: integer 
+            format: int64
+            example: 54001
+      responses:
+        '200':
+          description: Successful 
+        '404':
+          description: Customer not found
+        '401':
+          description: Authorization information is missing or invalid.
+      security:
+        - OAuth2: [customer]
+        
+  '/customers/{customerId}/bag':
+    get:
+      tags:
+        - Customers
+      summary: Displays customer's bag of chosen items
+      description: Gets products from bag of the customer. Can be accessed by the customer and admin only.
+      operationId: customerBag
+      parameters:
+        - name: customerId
+          in: path
+          description: Id of customer
+          required: true
+          schema:
+            type: integer 
+      responses:
+        '200':
+          description: Successful Response, returns bag of chosen items of customer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/customerProducts'
+        '404':
+          description: Customer not found
+        '401':
+          description: Authorization information is missing or invalid.
+      security:
+        - OAuth2: [customer, admin]
+        
+    post:
+      tags:
+        - Customers
+      summary: Adds to the bag
+      description: Adds a product to the bag of the customer. Can be accessed by the customer only.
+      operationId: addBag
+      parameters:
+        - name: customerId
+          in: path
+          description: Id of customer
+          required: true
+          schema:
+            type: integer 
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/customerProducts'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          
+        '404':
+          description: Customer not found
+        '401':
+          description: Authorization information is missing or invalid.
+      security:
+        - OAuth2: [customer]
+        
+  '/customers/{customerId}/bag/{productId}':
+    delete:
+      tags:
+        - Customers
+      summary: Deletes product from bag
+      description: Deletes chosen product from bag of the customer. Can be accessed by the customer .
+      operationId: deleteFromBag
+      parameters:
+        - name: customerId
+          in: path
+          description: Id of customer
+          required: true
+          schema:
+            type: integer 
+            format: int32
+            example: 1001
+        - name: productId
+          in: path
+          description: Id of product
+          required: true
+          schema:
+            type: integer 
+            format: int64
+            example: 54001
+      responses:
+        '200':
+          description: Successful 
+        '404':
+          description: Customer not found
+        '401':
+          description: Authorization information is missing or invalid.
+      security:
+        - OAuth2: [customer]
+        
+  '/customers/{customerId}/bag/order':
+    post:
+      tags:
+        - Customers
+      summary: Place order for items in bag
+      description: Only the customer can place order for items in the bag.
+      operationId: placeOrder
+      parameters:
+        - name: customerId
+          in: path
+          description: Id of customer
+          required: true
+          schema:
+            type: integer 
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/order'
+        description: order placed for purchasing the products
+        required: true   
+      responses:
+        '200':
+          description: Successful operation, order placed
+        '400':
+          description: Invalid Order
+        '401':
+          description: Authorization information is missing or invalid.
+      security:
+        - OAuth2: [customer, admin]
+          
+components:
+  schemas:   
+    categories:
+      type: object
+      properties:
+        categoryId:
+          type: integer
+          format: int32
+          example: 1001
+        name:
+          type: string
+          example: women-shirt
+       
+    filter:   
+      type: object
+      properties:
+        priceLower:
+          type: integer
+          format: int32
+          default: 0
+          example: 500
+        priceUpper:
+          type: integer
+          format: int32
+          example: 5000
+        brand:
+          type: array
+          items: 
+            type: string
+          default: []
+          example: ["H&M"]
+        color:
+          type: array
+          items: 
+            type: string
+          default: []
+          example: ["blue","red"]
+          
+    categoryProducts:
+      type: object
+      properties:
+        productId:
+          type: integer
+          format: int64
+          example: 54001
+        name:
+          type: string
+          example: abc
+        price:
+          type: number 
+          example: 750
+        photoUrls:
+          type: array
+          items:
+            type: string
+          example: "exampleUrl"
+    
+    customerProducts:
+      type: object
+      properties:
+        productId:
+          type: integer
+          format: int64
+          example: 54001
+        name:
+          type: string
+          example: abc
+        price:
+          type: number 
+          example: 750
+        color: 
+          type: string
+          example: red
+        quantity:
+          type: integer
+          format: int32
+          example: 2
+        
+            
+    products:
+      type: object
+      properties:
+        productId:
+          type: integer
+          format: int64
+          example: 54001
+        categoryId:
+          description: Category under which product comes
+          type: integer
+          format: int32
+          example: 1001
+        
+        name:
+          type: string
+          example: "abc"
+        price:
+          type: number
+          example: 750
+        sizes:
+          type: array
+          items:
+            type: string
+          example: ["S","M","L","XL"]
+        colors: 
+          type: array
+          items:  
+            type: string
+          example: ["red","blue","green"]
+        photoUrls:
+          type: array
+          items:
+            type: string
+          example: ["sampleUrl1","sampleUrl2"]
+        details:
+          type: string
+          example: "Solid T-shirt, has a round neck, short sleeves"
+        otherFeatures:
+          type: array
+          items:
+            type: string 
+          example: ["100% cotton", "Machine-wash"]
+        
+                  
+    customer:
+      type: object
+      properties:
+        customerId:
+          type: string
+          example: "AB1100"
+        username:
+          type: string
+          example: "Jack54"
+        Name:
+          type: string
+          example: "Jack Geller"
+        email:
+          type: string
+          example: "jack@gmail.com"
+        phone:
+          type: string
+          example: "9876543212"
+        password:
+          type: string
+    profile:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "Jack54"
+        name:
+          type: string
+          example: "Jack Geller"
+        email:
+          type: string
+          example: "jack@gmail.com"
+        phone:
+          type: string
+          example: "9876543212"
+        address:
+          type: string
+          example: "32 Park Avenue"
+          
+    order:
+      type: object
+      properties:
+        customerId:
+          type: string
+          example: "AB1100"
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/customerProducts'
+        modeOfPayment:
+          type: string
+          description: Mode of Payment
+          enum:
+            - credit card
+            - debit card
+            - COD
+          example: "COD" 
+        shipDate:
+          type: string
+          format: date-time
+          example: "03-04-2020"
+        status:
+          type: string
+          description: Order Status
+          enum:
+            - placed
+            - shiping
+            - delivered
+            - return 
+          example: "placed"
+        complete:
+          type: boolean
+          default: false
+          example: false
+
+          
+  securitySchemes:
+    petstore_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://example.com/oauth
+          scopes:
+            customer: Grants access to logged in customer
+            admin: Grants access to admin operations
